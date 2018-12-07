@@ -247,7 +247,7 @@ RBTree<Element, Compar>::rebalanceDUG(Node *nd)
     Node *uncle = nd->_parent->_parent->getChild(!nd->_parent->isRightChild());
 
     // если дядя такой же красный, как сам нод и его папа...
-    if (uncle->isRed())
+    if (uncle != nullptr && uncle->isRed())
     {
         // дядю и папу красим в черное
         // а дедушку — в коммунистические цвета
