@@ -316,7 +316,7 @@ void RBTree<Element, Compar>::rebalance(Node *nd)
     // TODO: метод реализуют студенты
 
     //...
-    if(nd->_color == BLACK)
+    if (nd->_color == BLACK)
         return;
 
     // Пока папа цвета пионерского галстука, действуем
@@ -335,6 +335,9 @@ template<typename Element, typename Compar>
 void RBTree<Element, Compar>::rotLeft(typename RBTree<Element, Compar>::Node *nd)
 {
     // правый потомок, который станет после левого поворота "выше"
+    if (nd->_right == nullptr)
+        throw std::invalid_argument("Error");
+
     Node *y = nd->_right;
 
     if (!y)
@@ -379,6 +382,10 @@ void RBTree<Element, Compar>::rotLeft(typename RBTree<Element, Compar>::Node *nd
 template<typename Element, typename Compar>
 void RBTree<Element, Compar>::rotRight(typename RBTree<Element, Compar>::Node *nd)
 {
+    // правый потомок, который станет после левого поворота "выше"
+    if (nd->_left == nullptr)
+        throw std::invalid_argument("Error");
+
     // left потомок, который станет после right поворота "выше"
     Node *y = nd->_left;
 
