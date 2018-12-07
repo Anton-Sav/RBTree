@@ -334,10 +334,6 @@ void RBTree<Element, Compar>::rebalance(Node *nd)
 template<typename Element, typename Compar>
 void RBTree<Element, Compar>::rotLeft(typename RBTree<Element, Compar>::Node *nd)
 {
-    // правый потомок, который станет после левого поворота "выше"
-    if (nd->_right == nullptr)
-        throw std::invalid_argument("Error");
-
     Node *y = nd->_right;
 
     if (!y)
@@ -346,8 +342,9 @@ void RBTree<Element, Compar>::rotLeft(typename RBTree<Element, Compar>::Node *nd
     Node *tempLeftChild = y->getChild(true);
     //make the left child y right at nd
     nd->setRight(tempLeftChild);
-    //then we make nd a parent of the left child y
-    tempLeftChild->_parent = nd;
+    //then we make nd a parent of the left child y  //UPD: Check if children have y
+    if (tempLeftChild != nullptr)
+        tempLeftChild->_parent = nd;
 
     //now parent nd must be made parent y
     if (nd->_parent == nullptr) //if nd was root
@@ -382,9 +379,7 @@ void RBTree<Element, Compar>::rotLeft(typename RBTree<Element, Compar>::Node *nd
 template<typename Element, typename Compar>
 void RBTree<Element, Compar>::rotRight(typename RBTree<Element, Compar>::Node *nd)
 {
-    // правый потомок, который станет после левого поворота "выше"
-    if (nd->_left == nullptr)
-        throw std::invalid_argument("Error");
+
 
     // left потомок, который станет после right поворота "выше"
     Node *y = nd->_left;
@@ -395,8 +390,9 @@ void RBTree<Element, Compar>::rotRight(typename RBTree<Element, Compar>::Node *n
     Node *tempRightChild = y->getChild(false);
     //make the right child y left at nd
     nd->setLeft(tempRightChild);
-    //then we make nd a parent of the right child y
-    tempRightChild->_parent = nd;
+    //then we make nd a parent of the right child y   //UPD: Check if children have y
+    if (tempRightChild != nullptr)
+        tempRightChild->_parent = nd;
 
     //now parent nd must be made parent y
     if (nd->_parent == nullptr) //if nd was root
