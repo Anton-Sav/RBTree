@@ -316,6 +316,8 @@ void RBTree<Element, Compar>::rebalance(Node *nd)
     // TODO: метод реализуют студенты
 
     //...
+    if(nd->_color == BLACK)
+        return;
 
     // Пока папа цвета пионерского галстука, действуем
     while (nd->_parent != nullptr && nd->_parent->isRed())
