@@ -357,11 +357,8 @@ void RBTree<Element, Compar>::rotLeft(typename RBTree<Element, Compar>::Node *nd
         // отладочное событие
         if (_dumper)
             _dumper->rbTreeEvent(IRBTreeDumper<Element, Compar>::DE_AFTER_LROT, this, nd);
-        return;
 
     }
-
-    y->_parent = nd->_parent;
 
     //if the child is left, then put the parent nd of the left descendant y, otherwise
     if (nd->isLeftChild())
@@ -385,8 +382,6 @@ void RBTree<Element, Compar>::rotLeft(typename RBTree<Element, Compar>::Node *nd
 template<typename Element, typename Compar>
 void RBTree<Element, Compar>::rotRight(typename RBTree<Element, Compar>::Node *nd)
 {
-
-
     // left потомок, который станет после right поворота "выше"
     Node *y = nd->_left;
 
@@ -408,7 +403,7 @@ void RBTree<Element, Compar>::rotRight(typename RBTree<Element, Compar>::Node *n
         // отладочное событие
         if (_dumper)
             _dumper->rbTreeEvent(IRBTreeDumper<Element, Compar>::DE_AFTER_LROT, this, nd);
-        return;
+       
 
     }
 
