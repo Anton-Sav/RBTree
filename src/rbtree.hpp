@@ -353,19 +353,15 @@ void RBTree<Element, Compar>::rotLeft(typename RBTree<Element, Compar>::Node *nd
     if (nd->_parent == nullptr) //if nd was root
     {
         _root = y;
+    } else
+    {
 
-        // отладочное событие
-        if (_dumper)
-            _dumper->rbTreeEvent(IRBTreeDumper<Element, Compar>::DE_AFTER_LROT, this, nd);
-
+        //if the child is left, then put the parent nd of the left descendant y, otherwise
+        if (nd->isLeftChild())
+            nd->_parent->setLeft(y);
+        else
+            nd->_parent->setRight(y);
     }
-
-    //if the child is left, then put the parent nd of the left descendant y, otherwise
-    if (nd->isLeftChild())
-        nd->_parent->setLeft(y);
-    else
-        nd->_parent->setRight(y);
-
     //now nd - a child y
     y->setLeft(nd);
     //now y - parent nd
@@ -399,20 +395,15 @@ void RBTree<Element, Compar>::rotRight(typename RBTree<Element, Compar>::Node *n
     if (nd->_parent == nullptr) //if nd was root
     {
         _root = y;
+    } else
+    {
 
-        // отладочное событие
-        if (_dumper)
-            _dumper->rbTreeEvent(IRBTreeDumper<Element, Compar>::DE_AFTER_LROT, this, nd);
-       
-
+        //if the child is right, then put the parent nd of the tight descendant y, otherwise
+        if (nd->isRightChild())
+            nd->_parent->setRight(y);
+        else
+            nd->_parent->setLeft(y);
     }
-
-    //if the child is right, then put the parent nd of the tight descendant y, otherwise
-    if (nd->isRightChild())
-        nd->_parent->setRight(y);
-    else
-        nd->_parent->setLeft(y);
-
     //now nd - a child y
     y->setRight(nd);
     //now y - parent nd
