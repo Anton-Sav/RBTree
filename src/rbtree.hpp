@@ -316,18 +316,21 @@ void RBTree<Element, Compar>::rebalance(Node *nd)
     // TODO: метод реализуют студенты
 
     //...
-    if (nd->_color == BLACK)
-        return;
-
-    // Пока папа цвета пионерского галстука, действуем
-    while (nd->_parent != nullptr && nd->_parent->isRed())
+    if (nd != nullptr)
     {
-        // локальная перебалансировка семейства "папа, дядя, дедушка" и повторная проверка
-        nd = rebalanceDUG(nd);
-    }
+        if (nd->_color == BLACK)
+            return;
 
-    //We paint a root in black by condition
-    _root->setBlack();
+        // Пока папа цвета пионерского галстука, действуем
+        while (nd->_parent != nullptr && nd->_parent->isRed())
+        {
+            // локальная перебалансировка семейства "папа, дядя, дедушка" и повторная проверка
+            nd = rebalanceDUG(nd);
+        }
+
+        //We paint a root in black by condition
+        _root->setBlack();
+    }
 }
 
 
@@ -423,6 +426,95 @@ void RBTree<Element, Compar>::rotRight(typename RBTree<Element, Compar>::Node *n
 
 }
 
+template<typename Element, typename Compar>
+typename RBTree<Element, Compar>::Node *RBTree<Element, Compar>::findForRemove(const Element &key)
+{
+    Node *node = _root;
+
+    if (node == nullptr)
+        throw std::invalid_argument("node is nullptr");
+    //cycle for running through the tree
+    while (node)
+    {
+        /** as the left child is less than the parent, and the right one is more,
+         then for finding we will need 2 checks and if neither one is fulfilled,
+         then we have found the necessary element */
+        if (key < node->getKey())
+        {
+            node = node->getChild(true);    //go to the left child
+        } else
+        {
+            if (key > node->getKey())   //if you hit this block, the key is greater than or equal to
+            {
+                node = node->getChild(false);  //if you hit this block, then the key is larger, so go to the right child
+            } else
+            {
+                return node;    //if you hit this block, the key is found
+            }
+
+        }
+    }
+    return nullptr;
+}
+
+template<typename Element, typename Compar>
+void RBTree<Element, Compar>::remove(const Element &key)
+{
+    Node *tempChildChild, *tempChildNodeForRemove;
+
+    Node *tempNode = findForRemove(key);
+
+    //throw an exception if the node is not found
+    if (tempNode == nullptr)
+        throw std::invalid_argument("Key not find");
+
+    //check if one of the children does not exist, assign the value of the temp node
+    if (tempNode->_left == nullptr || tempNode->_right == nullptr)
+    {
+        tempChildNodeForRemove = tempNode;
+
+    } else
+    {
+        //if not found, then go to the end of the right descendant
+        tempChildNodeForRemove = tempNode->_right;
+        while (tempChildNodeForRemove->_left != nullptr)
+            tempChildNodeForRemove = tempChildNodeForRemove->_left;
+    }
+
+    //Check if tempChildNodeForRemove is the only descendant
+    if (tempChildNodeForRemove->_left != nullptr)  //and remember the existing descendant
+        tempChildChild = tempChildNodeForRemove->_left;
+    else
+        tempChildChild = tempChildNodeForRemove->_right;
+
+    //check that everyone had parents and they were not zero
+    if (tempChildChild != nullptr && tempChildNodeForRemove != nullptr && tempChildChild->_parent != nullptr &&
+        tempChildNodeForRemove->_parent)
+        tempChildChild->_parent = tempChildNodeForRemove->_parent; //and remove parents tempChildNodeForRemove
+
+    //if he has parents
+    if (tempChildNodeForRemove->_parent != nullptr)
+    {
+        //if the left child is the left parent
+        if (tempChildNodeForRemove == tempChildNodeForRemove->_parent->_left)
+            tempChildNodeForRemove->_parent->_left = tempChildChild; //then we assign the child's tempChildNodeForRemove value to the left parent
+        else
+            tempChildNodeForRemove->_parent->_right = tempChildChild; //otherwise
+    } else
+        _root = tempChildChild; //if there were no parents, then this is the root
+
+
+    //if tempChildNodeForRemove is not equal to the node to be deleted
+    if (tempChildNodeForRemove != tempNode)
+        tempNode->_key = tempChildNodeForRemove->_key; //then in the node we assign the value of the child
+
+    //if the node to remove is black, then rebalance
+    if (tempChildNodeForRemove->_color == BLACK)
+        rebalance(tempChildChild);
+
+    //delete
+    free(tempChildNodeForRemove);
+}
 
 } // namespace xi
 

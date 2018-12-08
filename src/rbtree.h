@@ -18,32 +18,33 @@
 #define RBTREE_RBTREE_H_
 
 // Uncomment this if you want to implement deletion.
-//#define RBTREE_WITH_DELETION
+#define RBTREE_WITH_DELETION
 
 
-namespace xi {
-
+namespace xi
+{
 
 
 // Предварительное описание
-template <typename Element, typename Compar>
+template<typename Element, typename Compar>
 class RBTree;
-
 
 
 /** \brief Класс-интерфейс, описывающий коллбек-слушателя для событий, происходящих с деревом.
  *
  *  Реализация этого интерфейса и передача его 
  */
-template <typename Element, typename Compar>
-class IRBTreeDumper {
+template<typename Element, typename Compar>
+class IRBTreeDumper
+{
 public:
     // Объявление типов дерева и узла для упрощения доступа
     typedef RBTree<Element, Compar> TTree;
     typedef typename RBTree<Element, Compar>::Node TTreeNode;
 public:
     /** \brief Типы событий, на которые реагируем дампер. */
-    enum RBTreeDumperEvent {
+    enum RBTreeDumperEvent
+    {
         DE_AFTER_LROT,                  ///< После осуществления левого поворота.
         DE_AFTER_RROT,                  ///< После осуществления правого поворота.
         DE_AFTER_BST_INS,               ///< После вставки элемента в BST без перебалансировки.
@@ -64,7 +65,7 @@ public:
     // события
 
     /** \brief Событие, происходящее с деревом. */
-    virtual void rbTreeEvent(RBTreeDumperEvent ev, TTree* tr, TTreeNode* nd) = 0;
+    virtual void rbTreeEvent(RBTreeDumperEvent ev, TTree *tr, TTreeNode *nd) = 0;
 
 
 protected:
@@ -82,8 +83,9 @@ class RBTreeTest;
  *  \tparam Compar Функтор, выполняющий сравнение элементов для определения порядка. По умолчанию
  *  реализуется стандартным компаратором \c std::less.
  */
-template <typename Element, typename Compar = std::less<Element> >
-class RBTree {
+template<typename Element, typename Compar = std::less<Element> >
+class RBTree
+{
 public:
     // Типы на экспорт
     /** \brief Тип цвета узла дерева. */
@@ -99,19 +101,22 @@ public:
      *  для самого узла и его потомков. Это сделано с целью инкапсуляции, а само дерево объявлено
      *  по отношению к данному классу дружественным, чтобы оно имело доступ к своим узлам.
      */
-    class Node {    
+    class Node
+    {
         // Дерево имеет полный доступ к реализации узла!
         friend class RBTree<Element, Compar>;
 
         // Специальный подход, позволяющий следующему (шаблонному) классу иметь доступ 
         // к закрытым членам для их тестирования.
         template<typename, typename>
-        friend class RBTreeTest;
+        friend
+        class RBTreeTest;
 
     public:
 
         /** \brief Определяет варианты принадлежности узла относительно родителя. */
-        enum WhichChild {
+        enum WhichChild
+        {
             LEFT,               ///< левый потомок
             RIGHT,              ///< правый потомок
             NONE                ///< вообще не потомок
@@ -119,19 +124,19 @@ public:
     public:
 
         /** \brief Возвращает константный указатель на левый дочерний узел. */
-        const Node* getLeft() const { return _left; }
+        const Node *getLeft() const { return _left; }
 
         /** \brief Возвращает константный указатель на правый дочерний узел. */
-        const Node* getRight() const { return _right; }
+        const Node *getRight() const { return _right; }
 
         /** \brief Возвращает константный указатель на родительский узел. */
-        const Node* getParent() const { return _parent; }
+        const Node *getParent() const { return _parent; }
 
         /** \brief Возвращает цвет узла. */
-        Color getColor() const { return _color;  }
+        Color getColor() const { return _color; }
 
         /** \brief Возвращает истину, если узел черный, иначе ложь. */
-        bool isBlack() const { return _color == BLACK;  }
+        bool isBlack() const { return _color == BLACK; }
 
         /** \brief Возвращает истину, если узел красный, иначе ложь. */
         bool isRed() const { return _color == RED; }
@@ -179,15 +184,16 @@ public:
 
 
         /** \brief Возвращает константную ссылку на элемент/ключ, храняющийся в узле. */
-        const Element& getKey() const { return _key; }
+        const Element &getKey() const { return _key; }
+
     protected:
 
-        Node(const Element& key = Element(),
-            Node* left = nullptr,
-            Node* right = nullptr,
-            Node* parent = nullptr,
-            Color col = BLACK)
-            : _key(key), _left(left), _right(right), _parent(parent), _color(col)
+        Node(const Element &key = Element(),
+             Node *left = nullptr,
+             Node *right = nullptr,
+             Node *parent = nullptr,
+             Color col = BLACK)
+                : _key(key), _left(left), _right(right), _parent(parent), _color(col)
         {
             // если переданы дочерние элементы, устанавливаем себя их родителем, но
             // но не говорим родителю, что мы его дочерь!
@@ -201,20 +207,20 @@ public:
         ~Node();                                ///< Деструктор нода гарантированно грохнет всех потомков.
 
     protected:
-        Node(const Node&);                      ///< КК не доступен.
-        Node& operator= (Node&);                ///< Оператор присваивания недоступен.
+        Node(const Node &);                      ///< КК не доступен.
+        Node &operator=(Node &);                ///< Оператор присваивания недоступен.
 
     protected:
         /** \brief Устанавливает левого потомка в \c lf. Если потомок не ноль, делает 
          *  для него текущий нод родителем, а у его предка отключает дочернюю связь.
          */
-        Node* setLeft(Node* lf);
-         
+        Node *setLeft(Node *lf);
+
         /** \brief Устанавливает правого потомка в \c rg аналогично левому.
          *
          *  <b style='color:orange'>Для реализации студентами.</b>
          */
-        Node* setRight(Node* rg);
+        Node *setRight(Node *rg);
 
         /** \brief Делает узел черным. */
         void setBlack() { _color = BLACK; }
@@ -230,7 +236,7 @@ public:
          *  значение флага isLeftChild в истину, если данный ребенок левый, иначе в ложь. Если папы нет, 
          *  возвращает null
          */
-        Node* getDaddy(bool& isLeftChild)
+        Node *getDaddy(bool &isLeftChild)
         {
             if (!_parent)
                 return nullptr;
@@ -242,7 +248,7 @@ public:
         }
 
         /** \brief Возвращает ребенка этого узла: (isLeft) — левого, иначе правого. */
-        Node* getChild(bool isLeft)
+        Node *getChild(bool isLeft)
         {
             return isLeft ? _left : _right;
         }
@@ -252,23 +258,22 @@ public:
          *  (!isLeft) — правый.
          *  \returns возвращает истину, если проверяемый узел является "правильным".
          */
-        bool isSpecificChildPrv(bool isLeft) const 
-        { 
+        bool isSpecificChildPrv(bool isLeft) const
+        {
             if (isLeft)         // проверяем, является ли левым узлом
                 return (_parent->_left == this);
-                                // иначе проверяем, является ли правым узлом
+            // иначе проверяем, является ли правым узлом
             return (_parent->_right == this);
         }
 
 
-
     protected:
         Element _key;                           ///< Несомая узлом информация.
-        Color   _color;                         ///< Цвет элемента.
+        Color _color;                         ///< Цвет элемента.
 
-        Node*   _parent;                        ///< Родитель узла.
-        Node*   _left;                          ///< Левый потомок.
-        Node*   _right;                         ///< Правый потомок.
+        Node *_parent;                        ///< Родитель узла.
+        Node *_left;                          ///< Левый потомок.
+        Node *_right;                         ///< Правый потомок.
     }; // class RBTree::Node
 
     friend class Node;
@@ -288,7 +293,7 @@ public:
      *  Т.к. дубликаты не допустимы, элемента с ключом \c key в дереве быть не должно. Если
      *  же такой элемент уже существует, генерируется исключительная ситуация \c std::invalid_argument.
      */
-    void insert(const Element& key);
+    void insert(const Element &key);
 
 #ifdef RBTREE_WITH_DELETION
 
@@ -299,7 +304,8 @@ public:
      *
      *  Если соответствующего ключа нет в дереве, генерирует исключительную ситуацию \c std::invalid_argument.
      */
-    void remove(const Element& key);
+    void remove(const Element &key);
+
 #endif // RBTREE_WITH_DELETION
 
     /** \brief Ищет элемент \c key в дереве и возвращает соответствующий ему узел. 
@@ -308,18 +314,21 @@ public:
      *
      *  \returns узел элемента \c key, если он есть в дереве, иначе \c nullptr.
      */
-    const Node* find(const Element& key);
+    const Node *find(const Element &key);
+
+    Node *findForRemove(const Element &key);
 
     /** \brief Возвращает истину, если дерево пусто, ложь иначе. */
     bool isEmpty() const { return _root == nullptr; }
 
     /** \brief Возвращает неизменяемый указатель на корневой элемент. */
-    const Node* getRoot() const { return _root;  }
+    const Node *getRoot() const { return _root; }
+
 public:
     // Отладочные операции
-    
+
     /** \brief Устанавливает отладочный дампер. */
-    void setDumper(IRBTreeDumper<Element, Compar>* dumper)
+    void setDumper(IRBTreeDumper<Element, Compar> *dumper)
     {
         _dumper = dumper;
     }
@@ -341,13 +350,13 @@ protected:
      *  Дубликаты не разрешены, исключение то же, что и у \c insert().
      *  \return Указатель на новодобавленный элемент.
      */
-    Node* insertNewBstEl(const Element& key);
+    Node *insertNewBstEl(const Element &key);
 
     /** \brief Выполняет перебалансировку дерева после добавления нового элемента в узел \c nd. 
      *
      *  <b style='color:orange'>Для реализации студентами.</b>
      */
-    void rebalance(Node* nd);
+    void rebalance(Node *nd);
 
 
     /** \brief Выполняет перебалансировку локальных предков узла \c nd: папы, дяди и дедушки.
@@ -356,10 +365,10 @@ protected:
      *
      *  \returns Новый актуальный узел, для которого могут нарушаться правила.
      */
-    Node* rebalanceDUG(Node* nd);
+    Node *rebalanceDUG(Node *nd);
 
     /** \brief Удаляет нод со всеми его потомками, освобождая память из-под них. */
-    void deleteNode(Node* nd);
+    void deleteNode(Node *nd);
 
     /** \brief Вращает поддерево относительно узла \c nd влево.
      *
@@ -368,19 +377,18 @@ protected:
      *  Требование: правый ребенок узла \c nd не должен быть null, иначе генерируется
      *  исключительная ситуация \c std::invalid_argument.
      */
-    void rotLeft(Node* nd);
+    void rotLeft(Node *nd);
 
     /** \brief Вращает поддерево относительно узла \c nd вправо. Условия и ограничения 
       * аналогичны (симметрично) левому вращению. 
       *
       *  <b style='color:orange'>Для реализации студентами.</b>
       */
-    void rotRight(Node* nd);
-
+    void rotRight(Node *nd);
 
 protected:
-    RBTree(const RBTree&);                      ///< КК не доступен.
-    RBTree& operator= (RBTree&);                ///< Оператор присваивания недоступен.
+    RBTree(const RBTree &);                      ///< КК не доступен.
+    RBTree &operator=(RBTree &);                ///< Оператор присваивания недоступен.
 
 protected:
     Compar _compar;                             ///< Компаратор сравнения двух элементов.
@@ -398,19 +406,19 @@ protected:
      *  узла всегда будет иметь порядок -INF, что, в свою очередь, накладывает дополнительные
      *  ограничения на предикат сравнение элементов, поэтому в настоящей реализации не используется.
      */
-    Node* _root;
-
+    Node *_root;
 
 
 protected:
     // Секция отладочных компонент
-    IRBTreeDumper<Element, Compar>* _dumper;
+    IRBTreeDumper<Element, Compar> *_dumper;
 
 
     // Специальный подход, позволяющий следующему классу иметь доступ к закрытым членам для их тестирования.
     template<typename, typename>
-    friend class RBTreeTest;
-  
+    friend
+    class RBTreeTest;
+
 }; // class RBTree
 
 
