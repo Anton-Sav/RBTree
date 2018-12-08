@@ -361,6 +361,8 @@ void RBTree<Element, Compar>::rotLeft(typename RBTree<Element, Compar>::Node *nd
 
     }
 
+    y->_parent = nd->_parent;
+
     //if the child is left, then put the parent nd of the left descendant y, otherwise
     if (nd->isLeftChild())
         nd->_parent->setLeft(y);
@@ -370,7 +372,8 @@ void RBTree<Element, Compar>::rotLeft(typename RBTree<Element, Compar>::Node *nd
     //now nd - a child y
     y->setLeft(nd);
     //now y - parent nd
-    nd->_parent = y;
+    if (nd != nullptr)
+        nd->_parent = y;
 
     // отладочное событие
     if (_dumper)
@@ -446,7 +449,8 @@ typename RBTree<Element, Compar>::Node *RBTree<Element, Compar>::findForRemove(c
         {
             if (key > node->getKey())   //if you hit this block, the key is greater than or equal to
             {
-                node = node->getChild(false);  //if you hit this block, then the key is larger, so go to the right child
+                node = node->getChild(
+                        false);  //if you hit this block, then the key is larger, so go to the right child
             } else
             {
                 return node;    //if you hit this block, the key is found
