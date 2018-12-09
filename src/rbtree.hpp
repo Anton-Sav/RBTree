@@ -243,94 +243,82 @@ template<typename Element, typename Compar>
 typename RBTree<Element, Compar>::Node *
 RBTree<Element, Compar>::rebalanceDUG(Node *nd)
 {
-    //           |node| |father| |grandfather|    |check which child is the father and return uncle|
-    Node *uncle = nd->_parent->_parent->getChild(!nd->_parent->isRightChild());
-
-    // если дядя такой же красный, как сам нод и его папа...
-    if (uncle != nullptr && uncle->isRed())
-    {
-        // дядю и папу красим в черное
-        // а дедушку — в коммунистические цвета
-        uncle->setBlack();
-        nd->_parent->setBlack();
-        nd->_parent->_parent->setRed();
-
-        //after all repainted we go higher and put a pointer to grandfather
-        nd = nd->_parent->_parent;
-
-        // отладочное событие
-        if (_dumper)
-            _dumper->rbTreeEvent(IRBTreeDumper<Element, Compar>::DE_AFTER_RECOLOR1, this, nd);
-
-        // теперь чередование цветов "узел-папа-дедушка-дядя" — К-Ч-К-Ч, но надо разобраться, что там
-        // с дедушкой и его предками, поэтому продолжим с дедушкой
-        //..
-    }// дядя черный
-    else
-    {
-        // смотрим, является ли узел "правильно-правым" у папочки
-
-        //if the parent of the node is a right child and the node itself is left, then we make a right turn
-        if (nd->_parent->isRightChild() && nd->isLeftChild())
-        {
-            nd = nd->_parent;
-            rotRight(nd);
-        }
-        //if the parent of the node is the left child and the node itself is right, then we make a left turn
-        if (nd->_parent->isLeftChild() && nd->isRightChild())
-        {
-            nd = nd->_parent;
-            rotLeft(nd);
-        }
-
-
-        //after turning repaint parent to black
-        nd->_parent->setBlack();
-        // отладочное событие
-        if (_dumper)
-            _dumper->rbTreeEvent(IRBTreeDumper<Element, Compar>::DE_AFTER_RECOLOR3D, this, nd);
-
-
-        // деда в красный
-        nd->_parent->_parent->setRed();
-        // отладочное событие
-        if (_dumper)
-            _dumper->rbTreeEvent(IRBTreeDumper<Element, Compar>::DE_AFTER_RECOLOR3G, this, nd);
-
-        //check if the parent is a right child
-        if (nd->_parent->isRightChild())
-            rotLeft(nd->_parent->_parent); //we turn
-
-        //check if the parent is a left child
-        if (nd->_parent->isLeftChild())
-            rotRight(nd->_parent->_parent);
-    }
-
-    return nd;
 }
 
 
 template<typename Element, typename Compar>
 void RBTree<Element, Compar>::rebalance(Node *nd)
 {
-    // TODO: метод реализуют студенты
-
-    //...
-    if (nd != nullptr)
+    Node *temp;
+    //as long as the parent is red
+    while (nd->_parent != nullptr && nd->_parent->isRed())
     {
-        if (nd->_color == BLACK)
-            return;
-
-        // Пока папа цвета пионерского галстука, действуем
-        while (nd->_parent != nullptr && nd->_parent->isRed())
+        //check if the parent is the left child
+        if (nd->_parent == nd->_parent->_parent->_left)
         {
-            // локальная перебалансировка семейства "папа, дядя, дедушка" и повторная проверка
-            nd = rebalanceDUG(nd);
+            //then remember uncle
+            temp = nd->_parent->_parent->_right;
+            //if uncle is red case 1
+            if (temp != nullptr && temp->_color == RED)
+            {
+                //we paint parents black
+                nd->_parent->_color = BLACK;
+                //Uncle paint in black
+                temp->_color = BLACK;
+                //grandpa in red
+                nd->_parent->_parent->_color = RED;
+                //grandpa becomes current node
+                nd = nd->_parent->_parent;
+            } else
+            {   //if the node is the right child
+                if (nd == nd->_parent->_right)
+                {
+                    //then left turn зфкуте
+                    nd = nd->_parent;
+                    rotLeft(nd);
+                }
+                //we paint parents black
+                nd->_parent->_color = BLACK;
+                //grandpa in red
+                nd->_parent->_parent->_color = RED;
+                //turn right relative to grandfather
+                rotRight(nd->_parent->_parent);
+            }
+        } else
+        {
+            //left uncle
+            temp = nd->_parent->_parent->_left;
+            //and if he is red
+            if (temp != nullptr && temp->_color == RED)
+            {
+                //parent to black
+                nd->_parent->_color = BLACK;
+                //uncle in black
+                temp->_color = BLACK;
+                //grandpa in red
+                nd->_parent->_parent->_color = RED;
+                //current node - grandfather
+                nd = nd->_parent->_parent;
+            } else
+            {
+                //if the node is the left child
+                if (nd == nd->_parent->_left)
+                {
+                    //then right turn relative to father
+                    nd = nd->_parent;
+                    rotRight(nd);
+                }
+                //parent to black
+                nd->_parent->_color = BLACK;
+                //grandpa in red
+                nd->_parent->_parent->_color = RED;
+                //left turn relative to grandfather
+                rotLeft(nd->_parent->_parent);
+            }
         }
 
-        //We paint a root in black by condition
-        _root->setBlack();
     }
+    _root->setBlack();
 }
 
 
@@ -499,10 +487,11 @@ void RBTree<Element, Compar>::remove(const Element &key)
         tempNode->_key = tempChildNodeForRemove->_key; //then in the node we assign the value of the child
 
     //if the node to remove is black, then rebalance
-    if (tempChildNodeForRemove->_color == BLACK)
-        rebalance(tempChildChild);
+    if (tempChildNodeForRemove->_color == BLACK){
+        if(tempChildChild != nullptr)
+            rebalance(tempChildChild);
+    }
 
-    
     //delete
     free(tempChildNodeForRemove);
 }
