@@ -502,6 +502,7 @@ void RBTree<Element, Compar>::remove(const Element &key)
     if (tempChildNodeForRemove->_color == BLACK)
         rebalance(tempChildChild);
 
+    
     //delete
     free(tempChildNodeForRemove);
 }
